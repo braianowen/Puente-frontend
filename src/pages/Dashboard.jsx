@@ -32,7 +32,11 @@ const SYMBOLS = [
 
   // 5 Criptomonedas (formato correcto para Alpha Vantage)
 
-
+  'BTC',
+  'ETH',
+  'XRP',
+  'SOL',
+  'ADA',
   // 5 Pares Forex (formato correcto)
   "EURUSD", // Euro/Dólar
   "GBPUSD", // Libra/Dólar

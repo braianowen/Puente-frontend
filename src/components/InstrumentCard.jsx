@@ -17,15 +17,38 @@ export default function InstrumentCard({
   const [isUpdating, setIsUpdating] = useState(false)
   const [error, setError] = useState('')
 
-  // Determinar si es favorito (puede venir por props o del store)
+  // Determinar si es favorito
   const internalIsFavorite = useSelector(state => 
     state.instruments.favorites.includes(instrument.symbol)
   )
   const isFavorite = propIsFavorite !== undefined ? propIsFavorite : internalIsFavorite
 
-  const handleFavorite = async (e) => {
-    e?.stopPropagation() // Evitar propagación si viene de un click
+  // Manejar formato de precios y cambios
+  const formatPrice = (price) => {
+    if (!price) return 'N/A'
+    return parseFloat(price).toLocaleString('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    })
+  }
+
+  const formatChange = (change, percent) => {
+    if (!change || !percent) return 'N/A'
     
+    const isPositive = parseFloat(change) >= 0
+    const changeSymbol = isPositive ? '+' : ''
+    
+    return (
+      <span className={`${isPositive ? 'text-green-500' : 'text-red-500'}`}>
+        {changeSymbol}{parseFloat(change).toFixed(2)} ({percent})
+      </span>
+    )
+  }
+
+  const handleFavorite = async (e) => {
+    e?.stopPropagation()
     if (!token || isUpdating) return
     
     setIsUpdating(true)
@@ -38,21 +61,26 @@ export default function InstrumentCard({
         }
       }
 
-      // Llamada API para actualizar favoritos en backend
-      await axios.post(
-        'http://localhost:8000/favorites/toggle', 
-        { symbol: instrument.symbol },
-        config
-      )
+      // Usamos el método adecuado según si es favorito o no
+      if (isFavorite) {
+        await axios.delete(
+          `http://localhost:8000/favorites/${instrument.symbol}`,
+          config
+        )
+      } else {
+        await axios.post(
+          'http://localhost:8000/favorites', 
+          { symbol: instrument.symbol },
+          config
+        )
+      }
 
-      // Si el componente recibe el handler por props, usarlo
+      // Actualizamos el estado local
       if (propOnToggleFavorite) {
         propOnToggleFavorite(instrument.symbol)
       } else {
-        // Si no, usar el dispatch directo
         dispatch(toggleFavorite(instrument.symbol))
       }
-      
     } catch (err) {
       setError('Error al actualizar favoritos. Intente nuevamente.')
       console.error('Error actualizando favoritos:', err.response?.data || err.message)
@@ -90,10 +118,15 @@ export default function InstrumentCard({
       
       <div className="space-y-2">
         <h3 className="text-xl font-semibold">{instrument.symbol}</h3>
-        <p className="text-gray-600">{instrument.name}</p>
-        <p className="text-lg font-medium">${instrument.price}</p>
-        <p className={`text-sm ${instrument.change_percent?.startsWith('+') ? 'text-green-500' : 'text-red-500'}`}>
-          {instrument.change} ({instrument.change_percent})
+        <p className="text-gray-600">{instrument.name || 'Nombre no disponible'}</p>
+        <p className="text-lg font-medium">
+          {formatPrice(instrument.price || instrument.close || instrument['05. price'])}
+        </p>
+        <p className="text-sm">
+          {formatChange(
+            instrument.change || instrument['09. change'],
+            instrument.change_percent || instrument['10. change percent']
+          )}
         </p>
       </div>
 
