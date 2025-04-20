@@ -21,14 +21,14 @@ const SYMBOLS = [
   // Acciones
   'AAPL',    // Apple
   'MSFT',    // Microsoft
-  'GOOGL',   // Alphabet (Google)
-  'AMZN',    // Amazon
-  'TSLA',    // Tesla
-  'META',    // Meta (Facebook)
-  'NVDA',    // NVIDIA
-  'V',       // Visa
-  'WMT',     // Walmart
-  'JPM',     // JPMorgan Chase
+  // 'GOOGL',   // Alphabet (Google)
+  // 'AMZN',    // Amazon
+  // 'TSLA',    // Tesla
+  // 'META',    // Meta (Facebook)
+  // 'NVDA',    // NVIDIA
+  // 'V',       // Visa
+  // 'WMT',     // Walmart
+  // 'JPM',     // JPMorgan Chase
 
   // 5 Criptomonedas (formato correcto para Alpha Vantage)
 

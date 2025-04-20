@@ -21,25 +21,49 @@ ChartJS.register(
   Legend
 );
 
-// Función helper para manejar números de forma segura
-const safeNumber = (value, defaultValue = 0) => {
-  if (value === null || value === undefined) return defaultValue;
-  const num = Number(value);
-  return isNaN(num) ? defaultValue : num;
-};
-
-// Función para formatear números con decimales fijos
-const formatNumber = (value, decimals = 2, fallback = "N/A") => {
-  const num = safeNumber(value, null);
-  return num !== null ? num.toFixed(decimals) : fallback;
-};
-
 const InstrumentDetailsModal = ({
   instrument,
   isFavorite,
   onToggleFavorite,
   onClose,
 }) => {
+  const getFieldValue = (instrument, fieldNames) => {
+    for (const field of fieldNames) {
+      if (instrument[field] !== undefined) {
+        return instrument[field];
+      }
+    }
+    return null;
+  };
+
+  // Función helper para manejar números de forma segura
+  const safeNumber = (value, defaultValue = 0) => {
+    if (value === null || value === undefined) return defaultValue;
+    const num = Number(value);
+    return isNaN(num) ? defaultValue : num;
+  };
+
+  // Función para formatear números con decimales fijos
+  const formatNumber = (value, decimals = 2, fallback = "N/A") => {
+    const num = safeNumber(value, null);
+    return num !== null ? num.toFixed(decimals) : fallback;
+  };
+
+  const price = getFieldValue(instrument, ["price", "05. price"]);
+  const change = getFieldValue(instrument, ["change", "09. change"]);
+  const changePercent = getFieldValue(instrument, [
+    "change_percent",
+    "10. change percent",
+  ]);
+  const open = getFieldValue(instrument, ["open", "02. open"]);
+  const high = getFieldValue(instrument, ["high", "03. high", "high_24h"]);
+  const low = getFieldValue(instrument, ["low", "04. low", "low_24h"]);
+  const volume = getFieldValue(instrument, [
+    "volume",
+    "06. volume",
+    "total_volume",
+  ]);
+
   // Mueve todas las operaciones de datos dentro del componente
   const historicalData = instrument.historicalData?.daily || [];
   const latestDayData = historicalData[historicalData.length - 1] || {};
@@ -51,7 +75,9 @@ const InstrumentDetailsModal = ({
     datasets: [
       {
         label: "Precio de Cierre",
-        data: historicalData.map((item) => safeNumber(item.close || item.price)),
+        data: historicalData.map((item) =>
+          safeNumber(item.close || item.price)
+        ),
         borderColor: "rgb(59, 130, 246)",
         backgroundColor: "rgba(59, 130, 246, 0.5)",
         tension: 0.1,
@@ -85,33 +111,46 @@ const InstrumentDetailsModal = ({
   };
 
   // Cálculo de rangos (maneja casos donde no hay datos históricos)
-  const yearlyHigh = historicalData.length > 0 
-    ? Math.max(...historicalData.map((item) => safeNumber(item.high || item.price)))
-    : null;
-  
-  const yearlyLow = historicalData.length > 0
-    ? Math.min(...historicalData.map((item) => safeNumber(item.low || item.price)))
-    : null;
+  const yearlyHigh =
+    historicalData.length > 0
+      ? Math.max(
+          ...historicalData.map((item) => safeNumber(item.high || item.price))
+        )
+      : null;
+
+  const yearlyLow =
+    historicalData.length > 0
+      ? Math.min(
+          ...historicalData.map((item) => safeNumber(item.low || item.price))
+        )
+      : null;
 
   // Calcula el cambio porcentual de forma segura
   const calculateChange = () => {
+    // Primero intentar con datos de Alpha Vantage directos
+    if (instrument.change && instrument.change_percent) {
+      return {
+        change: formatNumber(instrument.change),
+        changePercent: instrument.change_percent,
+      };
+    }
+
+    // Lógica original para datos históricos
     const close = safeNumber(latestDayData.close || instrument.price, null);
     const open = safeNumber(firstDayData.open, null);
-    
+
     if (close === null || open === null || open === 0) {
       return { change: "N/A", changePercent: "N/A" };
     }
-    
+
     const change = close - open;
-    const changePercent = (change / open) * 100;
-    
+    const changePercent = ((change / open) * 100).toFixed(2) + "%";
+
     return {
       change: formatNumber(change),
-      changePercent: formatNumber(changePercent)
+      changePercent,
     };
   };
-
-  const { change, changePercent } = calculateChange();
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
@@ -123,7 +162,7 @@ const InstrumentDetailsModal = ({
                 {instrument.name} ({instrument.symbol})
               </h2>
               <p className="text-gray-600 capitalize">
-                {instrument.source?.toLowerCase() || ''}
+                {instrument.source?.toLowerCase() || ""}
               </p>
             </div>
             <button
@@ -165,57 +204,56 @@ const InstrumentDetailsModal = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             {/* Precio Actual */}
             <div className="bg-gray-50 p-4 rounded-lg">
-              <h3 className="font-semibold text-gray-700 mb-2">Precio Actual</h3>
+              <h3 className="font-semibold text-gray-700 mb-2">
+                Precio Actual
+              </h3>
               <p className="text-3xl font-bold">
-                ${formatNumber(instrument.price || latestDayData.close, 2, "0.00")}
-                <span
-                  className={`ml-2 text-sm ${
-                    instrument.change_percent?.startsWith("-") || 
-                    (changePercent !== "N/A" && changePercent.startsWith("-"))
-                      ? "text-red-500"
-                      : "text-green-500"
-                  }`}
-                >
-                  {instrument.change || change} (
-                  {instrument.change_percent || changePercent}%)
-                </span>
+                ${formatNumber(price, 2, "N/A")}
+                {change && changePercent && (
+                  <span
+                    className={`ml-2 text-sm ${
+                      changePercent.startsWith("-")
+                        ? "text-red-500"
+                        : "text-green-500"
+                    }`}
+                  >
+                    {change.startsWith("-") ? change : `+${change}`} (
+                    {changePercent})
+                  </span>
+                )}
               </p>
             </div>
 
             {/* Rango del Día */}
             <div className="bg-gray-50 p-4 rounded-lg">
-              <h3 className="font-semibold text-gray-700 mb-2">Rango del Día</h3>
+              <h3 className="font-semibold text-gray-700 mb-2">
+                Rango del Día
+              </h3>
               <div className="space-y-1">
                 <p>
                   <span className="text-gray-600">Apertura:</span> $
-                  {formatNumber(latestDayData.open || instrument.open)}
-                </p>
-                <p>
-                  <span className="text-gray-600">Cierre:</span> $
-                  {formatNumber(latestDayData.close || instrument.price)}
+                  {formatNumber(open)}
                 </p>
                 <p>
                   <span className="text-gray-600">Máximo:</span> $
-                  {formatNumber(
-                    latestDayData.high || 
-                    instrument.high_24h || 
-                    instrument.high
-                  )}
+                  {formatNumber(high)}
                 </p>
                 <p>
                   <span className="text-gray-600">Mínimo:</span> $
-                  {formatNumber(
-                    latestDayData.low || 
-                    instrument.low_24h || 
-                    instrument.low
-                  )}
+                  {formatNumber(low)}
+                </p>
+                <p>
+                  <span className="text-gray-600">Volumen:</span>{" "}
+                  {volume ? Number(volume).toLocaleString() : "N/A"}
                 </p>
               </div>
             </div>
 
             {/* Volumen y Capitalización */}
             <div className="bg-gray-50 p-4 rounded-lg">
-              <h3 className="font-semibold text-gray-700 mb-2">Volumen y Capitalización</h3>
+              <h3 className="font-semibold text-gray-700 mb-2">
+                Volumen y Capitalización
+              </h3>
               <div className="space-y-1">
                 <p>
                   <span className="text-gray-600">Volumen (24h):</span>{" "}
@@ -263,7 +301,9 @@ const InstrumentDetailsModal = ({
             <button
               onClick={() => onToggleFavorite(instrument.symbol)}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg ${
-                isFavorite ? "bg-red-100 text-red-600" : "bg-blue-100 text-blue-600"
+                isFavorite
+                  ? "bg-red-100 text-red-600"
+                  : "bg-blue-100 text-blue-600"
               }`}
             >
               {isFavorite ? (

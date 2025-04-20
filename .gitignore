@@ -22,3 +22,12 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+
+# Docker
+**/docker-compose.override.yml
+**/.docker
+
+# Build
+**/dist
+**/.cache
