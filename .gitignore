@@ -27,6 +27,9 @@ dist-ssr
 # Docker
 **/docker-compose.override.yml
 **/.docker
+.dockerignore
+Dockerfile.prod
+Dockerfile.dev
 
 # Build
 **/dist
