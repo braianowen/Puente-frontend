@@ -1,0 +1,30 @@
+VITE_API_URL=http://127.0.0.1:8000
+VITE_SYMBOLS=AAPL,MSFT,BTC,ETH,XRP,SOL,ADA,EURUSD,GBPUSD,USDJPY,AUDUSD
+
+# // const SYMBOLS = [
+# //   // Acciones
+# //   'AAPL',    // Apple
+# //   'MSFT',    // Microsoft
+# //   // 'GOOGL',   // Alphabet (Google)
+# //   // 'AMZN',    // Amazon
+# //   // 'TSLA',    // Tesla
+# //   // 'META',    // Meta (Facebook)
+# //   // 'NVDA',    // NVIDIA
+# //   // 'V',       // Visa
+# //   // 'WMT',     // Walmart
+# //   // 'JPM',     // JPMorgan Chase
+
+# //   // 5 Criptomonedas
+
+# //   'BTC',
+# //   'ETH',
+# //   'XRP',
+# //   'SOL',
+# //   'ADA',
+
+# //   // 5 Pares Forex
+# //   "EURUSD", // Euro/Dólar
+# //   "GBPUSD", // Libra/Dólar
+# //   "USDJPY", // Dólar/Yen Japonés
+# //   "AUDUSD", // Dólar Australiano/Dólar
+# // ];

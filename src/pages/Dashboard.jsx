@@ -16,33 +16,36 @@ import SearchBar from "../components/SearchBar";
 import { logout } from "../store/authSlice";
 import axios from "axios";
 
-const API = "http://127.0.0.1:8000";
-const SYMBOLS = [
-  // Acciones
-  'AAPL',    // Apple
-  'MSFT',    // Microsoft
-  // 'GOOGL',   // Alphabet (Google)
-  // 'AMZN',    // Amazon
-  // 'TSLA',    // Tesla
-  // 'META',    // Meta (Facebook)
-  // 'NVDA',    // NVIDIA
-  // 'V',       // Visa
-  // 'WMT',     // Walmart
-  // 'JPM',     // JPMorgan Chase
+// const API = "http://127.0.0.1:8000";
+// const SYMBOLS = [
+//   // Acciones
+//   'AAPL',    // Apple
+//   'MSFT',    // Microsoft
+//   // 'GOOGL',   // Alphabet (Google)
+//   // 'AMZN',    // Amazon
+//   // 'TSLA',    // Tesla
+//   // 'META',    // Meta (Facebook)
+//   // 'NVDA',    // NVIDIA
+//   // 'V',       // Visa
+//   // 'WMT',     // Walmart
+//   // 'JPM',     // JPMorgan Chase
 
-  // 5 Criptomonedas (formato correcto para Alpha Vantage)
+//   // 5 Criptomonedas (formato correcto para Alpha Vantage)
 
-  'BTC',
-  'ETH',
-  'XRP',
-  'SOL',
-  'ADA',
-  // 5 Pares Forex (formato correcto)
-  "EURUSD", // Euro/Dólar
-  "GBPUSD", // Libra/Dólar
-  "USDJPY", // Dólar/Yen Japonés
-  "AUDUSD", // Dólar Australiano/Dólar
-];
+//   'BTC',
+//   'ETH',
+//   'XRP',
+//   'SOL',
+//   'ADA',
+//   // 5 Pares Forex (formato correcto)
+//   "EURUSD", // Euro/Dólar
+//   "GBPUSD", // Libra/Dólar
+//   "USDJPY", // Dólar/Yen Japonés
+//   "AUDUSD", // Dólar Australiano/Dólar
+// ];
+
+const API = import.meta.env.VITE_API_URL;
+const SYMBOLS = import.meta.env.VITE_SYMBOLS.split(',');
 
 export default function Dashboard() {
   const dispatch = useDispatch();
